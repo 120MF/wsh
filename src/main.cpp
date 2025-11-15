@@ -1,6 +1,6 @@
 #include <print>
 
-#include "loop/loop.h"
+#include "loop.h"
 int main() {
   std::print("wsh");
   loop();

@@ -1,4 +1,5 @@
 #include "loop.h"
+#include "parser.h"
 #include <iostream>
 #include <print>
 #include <string>
@@ -10,6 +11,10 @@ void loop() {
     if (!std::getline(std::cin, line)) {
       break;
     }
-    std::println("{}", line);
+    std::print("| ");
+    for (auto s : parse_line(line)) {
+      std::print("{} | ", s);
+    }
+    std::println();
   }
 }
