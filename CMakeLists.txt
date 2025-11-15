@@ -3,6 +3,9 @@ project(wsh)
 
 set(CMAKE_CXX_STANDARD 23)
 
+file(GLOB_RECURSE WSH_SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
+
 add_executable(wsh
-  ${PROJECT_SOURCE_DIR}/src/main.cpp
+  ${WSH_SOURCES}
 )
+
