@@ -14,26 +14,29 @@ void loop() {
   std::string line;
   while (true) {
     std::print("> ");
+    // Get user input
     if (!std::getline(std::cin, line)) {
       break;
     }
     int wstatus{};
+    // Parse user input
     auto s = parse_line(line);
-    for (auto &str : s) {
-      std::println("{}", str);
-    }
+    // Start new process
     auto pid = fork();
     switch (pid) {
     case -1:
+      // On fork error
       perror("fork");
       std::exit(EXIT_FAILURE);
     case 0: {
+      // Child process
       auto &path = s.front();
       std::vector<char *> argv(s.size() + 1);
       for (size_t i = 0; i < s.size(); ++i) {
         argv[i] = s[i].data();
       }
       argv[s.size()] = nullptr;
+      // Execute
       auto ret = execvp(path.c_str(), argv.data());
       if (ret == -1) {
         perror("execvp");
@@ -42,6 +45,8 @@ void loop() {
       std::exit(EXIT_SUCCESS);
     }
     default: {
+      // Parent process
+      // Block wait child
       auto ret = waitpid(pid, &wstatus, 0);
       if (ret == -1) {
         perror("waitpid");
