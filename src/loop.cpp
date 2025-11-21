@@ -19,6 +19,9 @@ void loop() {
     }
     int wstatus{};
     auto s = parse_line(line);
+    for (auto &str : s) {
+      std::println("{}", str);
+    }
     auto pid = fork();
     switch (pid) {
     case -1:
@@ -26,14 +29,15 @@ void loop() {
       std::exit(EXIT_FAILURE);
     case 0: {
       auto &path = s.front();
-      char *argv[s.size()];
-      for (int i = 0; i < s.size() - 1; i++) {
-        argv[i] = s[i + 1].data();
+      std::vector<char *> argv(s.size() + 1);
+      for (size_t i = 0; i < s.size(); ++i) {
+        argv[i] = s[i].data();
       }
       argv[s.size()] = nullptr;
-      auto ret = execvp(path.c_str(), argv);
+      auto ret = execvp(path.c_str(), argv.data());
       if (ret == -1) {
         perror("execvp");
+        std::exit(EXIT_FAILURE);
       }
       std::exit(EXIT_SUCCESS);
     }
