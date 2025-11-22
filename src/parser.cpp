@@ -8,6 +8,7 @@ ParseResult parse_line(std::string str) {
   auto &words = res.words;
   std::stringstream s(str);
   std::string word;
+  // TODO: unwrap quotation mark ""
   while (s >> word) {
     if (word == ">" || word == "<" || word == ">>") {
       std::array<std::string, 2> tmp;
