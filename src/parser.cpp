@@ -1,12 +1,22 @@
 #include "parser.h"
+#include <array>
 #include <sstream>
+#include <string>
 
-std::vector<std::string> parse_line(std::string str) {
-  std::vector<std::string> res;
+ParseResult parse_line(std::string str) {
+  ParseResult res;
+  auto &words = res.words;
   std::stringstream s(str);
   std::string word;
   while (s >> word) {
-    res.push_back(word);
+    if (word == ">" || word == "<" || word == ">>") {
+      std::array<std::string, 2> tmp;
+      tmp[0] = word;
+      s >> tmp[1];
+      res.redirects.push_back(std::move(tmp));
+    } else {
+      words.push_back(word);
+    }
   }
   return std::move(res);
 }

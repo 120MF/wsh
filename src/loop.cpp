@@ -20,7 +20,7 @@ void loop() {
     }
     int wstatus{};
     // Parse user input
-    auto s = parse_line(line);
+    auto res = parse_line(line);
     // Start new process
     auto pid = fork();
     switch (pid) {
@@ -30,12 +30,13 @@ void loop() {
       std::exit(EXIT_FAILURE);
     case 0: {
       // Child process
-      auto &path = s.front();
-      std::vector<char *> argv(s.size() + 1);
-      for (size_t i = 0; i < s.size(); ++i) {
-        argv[i] = s[i].data();
+      auto &path = res.words.front();
+      auto size = res.words.size();
+      std::vector<char *> argv(size + 1);
+      for (size_t i = 0; i < size; ++i) {
+        argv[i] = res.words[i].data();
       }
-      argv[s.size()] = nullptr;
+      argv[size] = nullptr;
       // Execute
       auto ret = execvp(path.c_str(), argv.data());
       if (ret == -1) {
