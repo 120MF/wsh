@@ -13,8 +13,7 @@ ParseResult parse_line(std::string str) {
     if (word == "|") {
       res.processes.push_back(std::move(process));
       process = ParseResult::Process{};
-    }
-    if (word == ">" || word == "<" || word == ">>") {
+    } else if (word == ">" || word == "<" || word == ">>") {
       std::array<std::string, 2> tmp;
       tmp[0] = word;
       s >> tmp[1];
@@ -22,6 +21,9 @@ ParseResult parse_line(std::string str) {
     } else {
       process.words.push_back(word);
     }
+  }
+  if (!process.words.empty() || !process.redirects.empty()) {
+    res.processes.push_back(process);
   }
   return std::move(res);
 }

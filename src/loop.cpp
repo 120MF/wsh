@@ -8,6 +8,7 @@
 #include <string_view>
 
 #include <fcntl.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -19,29 +20,30 @@ void loop() {
     if (!std::getline(std::cin, line)) {
       break;
     }
-    int wstatus{};
     // Parse user input
     auto res = parse_line(line);
-    // Start new process
-    auto pid = fork();
-    switch (pid) {
-    case -1:
-      // On fork error
-      perror("fork");
-      std::exit(EXIT_FAILURE);
-    case 0: {
-      // Child process
-      child_process(res.processes);
+    std::vector<pid_t> pids;
+    for (auto &process : res.processes) {
+      // Start new process
+      auto pid = fork();
+      switch (pid) {
+      case -1:
+        // On fork error
+        perror("fork");
+        std::exit(EXIT_FAILURE);
+      case 0:
+        // Child process
+        child_process(process);
+      default:
+        pids.push_back(pid);
+      }
     }
-    default: {
-      // Parent process
-      // Block wait child
-      auto ret = waitpid(pid, &wstatus, 0);
+    for (auto pid : pids) {
+      auto ret = waitpid(pid, nullptr, 0);
       if (ret == -1) {
         perror("waitpid");
         std::exit(EXIT_FAILURE);
       }
-    }
     }
   }
 }
