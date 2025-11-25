@@ -8,6 +8,7 @@ ParseResult parse_line(std::string str) {
   ParseResult::Process process{};
   std::stringstream s(str);
   std::string word;
+  // TODO: unwrap quotation mark ""
   while (s >> word) {
     if (word == "|") {
       res.processes.push_back(std::move(process));

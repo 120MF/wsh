@@ -62,7 +62,7 @@ void child_process(ParseResult::Process &pro) {
     for (auto &arr : pro.redirects) {
       if (arr[0] == ">") {
         out_file = arr[1];
-        out_flag = O_CREAT;
+        out_flag = O_TRUNC;
       } else if (arr[0] == ">>") {
         out_file = arr[1];
         out_flag = O_APPEND;
@@ -70,13 +70,19 @@ void child_process(ParseResult::Process &pro) {
         in_file = arr[1];
       }
     }
+    std::vector<int> fds;
     if (!out_file.empty()) {
-      int fd = open(out_file.data(), out_flag | O_RDWR);
+      int fd = open(out_file.data(), out_flag | O_CREAT | O_WRONLY, 0644);
       if (fd == -1) {
         perror("open");
         std::exit(EXIT_FAILURE);
       }
-      dup2(fd, STDOUT_FILENO);
+      int ret = dup2(fd, STDOUT_FILENO);
+      if (ret == -1) {
+        perror("dup2");
+        std::exit(EXIT_FAILURE);
+      }
+      fds.push_back(fd);
     }
     if (!in_file.empty()) {
       int fd = open(in_file.data(), O_RDONLY);
@@ -84,7 +90,15 @@ void child_process(ParseResult::Process &pro) {
         perror("open");
         std::exit(EXIT_FAILURE);
       }
-      dup2(fd, STDIN_FILENO);
+      int ret = dup2(fd, STDIN_FILENO);
+      if (ret == -1) {
+        perror("dup2");
+        std::exit(EXIT_FAILURE);
+      }
+      fds.push_back(fd);
+    }
+    for (auto fd : fds) {
+      close(fd);
     }
   }
 
