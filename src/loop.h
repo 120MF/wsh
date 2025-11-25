@@ -1,8 +1,9 @@
 #ifndef INCLUDE_SRC_LOOP_H_
 #define INCLUDE_SRC_LOOP_H_
 
-struct ParseResult;
+#include "parser.h"
+
 void loop();
-void child_process(ParseResult &result);
+void child_process(ParseResult::Process &pro);
 
 #endif // INCLUDE_SRC_LOOP_H_

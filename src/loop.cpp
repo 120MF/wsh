@@ -1,5 +1,4 @@
 #include "loop.h"
-#include "parser.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -32,7 +31,7 @@ void loop() {
       std::exit(EXIT_FAILURE);
     case 0: {
       // Child process
-      child_process(res);
+      child_process(res.processes);
     }
     default: {
       // Parent process
@@ -47,20 +46,20 @@ void loop() {
   }
 }
 
-void child_process(ParseResult &result) {
+void child_process(ParseResult::Process &pro) {
   // Parse exe
-  auto &path = result.words.front();
-  auto size = result.words.size();
+  auto &path = pro.words.front();
+  auto size = pro.words.size();
   std::vector<char *> argv(size + 1);
   for (size_t i = 0; i < size; ++i) {
-    argv[i] = result.words[i].data();
+    argv[i] = pro.words[i].data();
   }
   argv[size] = nullptr;
   // Parse redirection
-  if (!result.redirects.empty()) {
+  if (!pro.redirects.empty()) {
     std::string_view out_file{}, in_file{};
     int out_flag{};
-    for (auto &arr : result.redirects) {
+    for (auto &arr : pro.redirects) {
       if (arr[0] == ">") {
         out_file = arr[1];
         out_flag = O_CREAT;

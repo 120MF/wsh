@@ -5,17 +5,21 @@
 
 ParseResult parse_line(std::string str) {
   ParseResult res;
-  auto &words = res.words;
+  ParseResult::Process process{};
   std::stringstream s(str);
   std::string word;
   while (s >> word) {
+    if (word == "|") {
+      res.processes.push_back(std::move(process));
+      process = ParseResult::Process{};
+    }
     if (word == ">" || word == "<" || word == ">>") {
       std::array<std::string, 2> tmp;
       tmp[0] = word;
       s >> tmp[1];
-      res.redirects.push_back(std::move(tmp));
+      process.redirects.push_back(std::move(tmp));
     } else {
-      words.push_back(word);
+      process.words.push_back(word);
     }
   }
   return std::move(res);

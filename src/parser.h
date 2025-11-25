@@ -5,11 +5,15 @@
 #include <string>
 #include <vector>
 
+using Words = std::vector<std::string>;
 using Redirects = std::vector<std::array<std::string, 2>>;
 
 struct ParseResult {
-  std::vector<std::string> words;
-  Redirects redirects;
+  struct Process {
+    Words words;
+    Redirects redirects;
+  };
+  std::vector<Process> processes;
 };
 
 ParseResult parse_line(std::string str);
