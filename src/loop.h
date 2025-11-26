@@ -4,8 +4,8 @@
 #include "parser.h"
 
 void loop();
-void child_process(ParseResult::Process &pro);
-void apply_pipe(ParseResult::Process &pro);
+void child_process(ParseResult &res, ParseResult::Process &pro);
+void apply_pipe(ParseResult &res, ParseResult::Process &pro);
 void apply_redirect(ParseResult::Process &pro);
 
 #endif // INCLUDE_SRC_LOOP_H_

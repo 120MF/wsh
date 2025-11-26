@@ -1,4 +1,5 @@
 #include "loop.h"
+#include "parser.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -33,8 +34,14 @@ void loop() {
         std::exit(EXIT_FAILURE);
       case 0:
         // Child process
-        child_process(process);
+        child_process(res, process);
       default:
+
+        auto [in, out] = process.pipe;
+        if (in.has_value())
+          close(in.value());
+        if (out.has_value())
+          close(out.value());
         pids.push_back(pid);
       }
     }
@@ -48,7 +55,7 @@ void loop() {
   }
 }
 
-void child_process(ParseResult::Process &pro) {
+void child_process(ParseResult &res, ParseResult::Process &pro) {
   // Parse exe
   auto &path = pro.words.front();
   auto size = pro.words.size();
@@ -58,7 +65,7 @@ void child_process(ParseResult::Process &pro) {
   }
   argv[size] = nullptr;
   // Parse pipe
-  apply_pipe(pro);
+  apply_pipe(res, pro);
   // Parse redirection
   apply_redirect(pro);
 
@@ -68,6 +75,7 @@ void child_process(ParseResult::Process &pro) {
     perror("execvp");
     std::exit(EXIT_FAILURE);
   }
+
   std::exit(EXIT_SUCCESS);
 }
 
@@ -119,11 +127,17 @@ void apply_redirect(ParseResult::Process &pro) {
   }
 }
 
-void apply_pipe(ParseResult::Process &pro) {
+void apply_pipe(ParseResult &res, ParseResult::Process &pro) {
   if (pro.pipe.first) {
-    dup2(pro.pipe.first.value(), STDIN_FILENO);
+    auto value = pro.pipe.first.value();
+    dup2(value, STDIN_FILENO);
   }
   if (pro.pipe.second) {
-    dup2(pro.pipe.second.value(), STDOUT_FILENO);
+    auto value = pro.pipe.second.value();
+    dup2(value, STDOUT_FILENO);
+  }
+  for (auto &process : res.processes) {
+    process.pipe.first.has_value() ? close(process.pipe.first.value()) : 0;
+    process.pipe.second.has_value() ? close(process.pipe.second.value()) : 0;
   }
 }
