@@ -1,6 +1,7 @@
 #include "loop.h"
 #include "parser.h"
 
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
@@ -56,6 +57,13 @@ void loop() {
 }
 
 void child_process(ParseResult &res, ParseResult::Process &pro) {
+  // Restore signal action
+
+  struct sigaction act{};
+  act.sa_handler = SIG_DFL;
+  sigaction(SIGINT, &act, nullptr);
+  sigaction(SIGTSTP, &act, nullptr);
+
   // Parse exe
   auto &path = pro.words.front();
   auto size = pro.words.size();
