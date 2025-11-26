@@ -2,7 +2,9 @@
 #define INCLUDE_SRC_PARSER_H_
 
 #include <array>
+#include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 using Words = std::vector<std::string>;
@@ -10,6 +12,8 @@ using Redirects = std::vector<std::array<std::string, 2>>;
 
 struct ParseResult {
   struct Process {
+    std::pair<std::optional<int>, std::optional<int>> pipe{std::nullopt,
+                                                           std::nullopt};
     Words words;
     Redirects redirects;
   };

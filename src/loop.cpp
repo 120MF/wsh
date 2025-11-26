@@ -57,7 +57,21 @@ void child_process(ParseResult::Process &pro) {
     argv[i] = pro.words[i].data();
   }
   argv[size] = nullptr;
+  // Parse pipe
+  apply_pipe(pro);
   // Parse redirection
+  apply_redirect(pro);
+
+  // Execute
+  auto ret = execvp(path.c_str(), argv.data());
+  if (ret == -1) {
+    perror("execvp");
+    std::exit(EXIT_FAILURE);
+  }
+  std::exit(EXIT_SUCCESS);
+}
+
+void apply_redirect(ParseResult::Process &pro) {
   if (!pro.redirects.empty()) {
     std::string_view out_file{}, in_file{};
     int out_flag{};
@@ -103,12 +117,13 @@ void child_process(ParseResult::Process &pro) {
       close(fd);
     }
   }
+}
 
-  // Execute
-  auto ret = execvp(path.c_str(), argv.data());
-  if (ret == -1) {
-    perror("execvp");
-    std::exit(EXIT_FAILURE);
+void apply_pipe(ParseResult::Process &pro) {
+  if (pro.pipe.first) {
+    dup2(pro.pipe.first.value(), STDIN_FILENO);
   }
-  std::exit(EXIT_SUCCESS);
+  if (pro.pipe.second) {
+    dup2(pro.pipe.second.value(), STDOUT_FILENO);
+  }
 }

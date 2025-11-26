@@ -5,5 +5,7 @@
 
 void loop();
 void child_process(ParseResult::Process &pro);
+void apply_pipe(ParseResult::Process &pro);
+void apply_redirect(ParseResult::Process &pro);
 
 #endif // INCLUDE_SRC_LOOP_H_

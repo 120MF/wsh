@@ -2,17 +2,22 @@
 #include <array>
 #include <sstream>
 #include <string>
+#include <unistd.h>
 
 ParseResult parse_line(std::string str) {
   ParseResult res;
   ParseResult::Process process{};
   std::stringstream s(str);
   std::string word;
+  int pipefd[2];
+  pipe(pipefd);
   // TODO: unwrap quotation mark ""
   while (s >> word) {
     if (word == "|") {
+      process.pipe.second = pipefd[0];
       res.processes.push_back(std::move(process));
       process = ParseResult::Process{};
+      process.pipe.first = pipefd[1];
     } else if (word == ">" || word == "<" || word == ">>") {
       std::array<std::string, 2> tmp;
       tmp[0] = word;
