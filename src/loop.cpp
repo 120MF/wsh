@@ -1,5 +1,5 @@
-#include "loop.h"
-#include "parser.h"
+#include "loop.hpp"
+#include "parser.hpp"
 
 #include <csignal>
 #include <cstdio>
