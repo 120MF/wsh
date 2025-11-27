@@ -1,18 +1,24 @@
-#include "parser.hpp"
+#ifndef INCLUDE_BUILTIN_FACTORY_HPP_
+#define INCLUDE_BUILTIN_FACTORY_HPP_
 
+#include "Foreground.hpp"
 #include <frozen/string.h>
 #include <frozen/unordered_map.h>
 
-using Func = void (*)(ParseResult &);
+using FuncPtr = void (*)(ParseResult &);
 
-static constexpr frozen::unordered_map<frozen::string, Func, 2> olaf = {
-    {"fg", nullptr},
-    {"bg", nullptr},
+using Registry = std::tuple<Foreground>;
+
+template <typename Tuple> struct MapBuilder;
+
+template <typename... Ts> struct MapBuilder<std::tuple<Ts...>> {
+  static constexpr auto map = []() {
+    std::array<std::pair<frozen::string, FuncPtr>, sizeof...(Ts)> entries = {
+        {{Ts::name, &Ts::execute}...}};
+    return frozen::make_unordered_map(entries);
+  }();
 };
 
-// static constexpr auto builtins = []() {
-//   constexpr frozen::string str("");
-//   std::pair<frozen::string, std::function<void()>> pair{str, {}};
-//   std::array<std::pair<frozen::string, std::function<void()>>, 1>
-//   pairs{{pair}}; return frozen::make_unordered_map(pairs);
-// }();
+static constexpr auto &builtin_map = MapBuilder<Registry>::map;
+
+#endif // INCLUDE_BUILTIN_FACTORY_HPP_

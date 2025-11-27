@@ -1,4 +1,5 @@
 #include "loop.hpp"
+#include "builtin/Factory.hpp"
 #include "parser.hpp"
 
 #include <csignal>
@@ -26,6 +27,13 @@ void loop() {
     auto res = parse_line(line);
     std::vector<pid_t> pids;
     for (auto &process : res.processes) {
+      // Try parse builtin first
+      frozen::string key_view(process.words[0].data(), process.words[0].size());
+      if (auto it = builtin_map.find(key_view); it != builtin_map.end()) {
+        // Find builtin, executing it
+        it->second(res);
+        continue;
+      }
       // Start new process
       auto pid = fork();
       switch (pid) {
